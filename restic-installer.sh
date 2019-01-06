@@ -94,8 +94,7 @@ function get_restic_release(){
 }
 
 
-# Check if restic is installed
-
+# Download part
 
 if [ ! -n "$(command -v restic)" ]
 then
@@ -111,17 +110,19 @@ then
 		cpu_type=$(os_type)
 		restic_version=$(get_restic_release)
 
-		installPath="/usr/local/bin";
+
+		installPath="/usr/bin";
 		
+		if [ ! -w "$installPath" ]; 
+		then 
+			installPath="/usr/local/bin";	
+		fi
 
 		url="https://github.com/restic/restic/releases/download/v"$restic_version"/restic_"$restic_version"_"$flavor"_"$cpu_type".bz2"
  
  		githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
  		responseCode=$( echo $githubHeaders | awk 'NR==1{print $2}')
- 
 
-		# echo $rateLimited;
-		# exit 1;
 
 		if [ "$responseCode" != "200" ];
 		then
@@ -137,7 +138,7 @@ then
 
  		echo -e "\033[36mDownloading to restic.bz2... \033[0m"
 
-		wget --progress=dot -O restic.bz2 $url
+		wget -O restic.bz2 $url
 		
 		echo -e "\033[36mExtracting restic.bz2... \033[0m"
 		bzip2 -d restic.bz2
@@ -157,7 +158,7 @@ then
 			read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' cronUpdate 
 
 			# Attempt to install restic
-			if [ -z $cronUpdate ] || [ $cronUpdate == "Y" ] || [ $cronUpdate == "y" ] || [ $cronUpdate == "yes" ]
+			if [ $cronUpdate == "Y" ] || [ $cronUpdate == "y" ] || [ $cronUpdate == "yes" ]
 			then
 				echo -e "\n# Dynamically added by restic installer\nIt can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
 				echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
