@@ -17,19 +17,19 @@ Workks on alot of platforms.
 ### Installation from the :octocat: ☁️ <sub><sup>git clone is recommended</sup></sub>
 rastic can be installed in 4 (that's right, four) ways: via `git clone`, `curl`, `wget` or plain old copy paste.
 
-#### via curl 
+#### curl
 
 ```shell
 bash -c "$(curl -L -s https://github.com/necenzurat/restic-installer/raw/master/restic-installer.sh)"
 ```
 
-#### via wget
+#### wget
 
 ```shell
 bash -c "$(wget -q -O - https://github.com/necenzurat/restic-installer/raw/master/restic-installer.sh)"
 ```
 
-#### via git clone 
+#### :sparkles: git clone 
 
 ```shell
 git clone https://github.com/necenzurat/restic-installer/
@@ -44,7 +44,7 @@ bash restic-installer.sh
 
 ### :page_facing_up: Issues
 
-[Click here to add issue](/issues)
+[Click here to add issue](https://github.com/necenzurat/restic-installer/issues)
 
 ### 📜License
 
