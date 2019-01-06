@@ -81,7 +81,7 @@ function get_restic_release(){
 
 
 function install_crontab () {
-		echo -e "\n# Dynamically added by restic installer\nIt can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
+		echo -e "\n# Dynamically added by restic installer\n#It can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
 		echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
 }
 
