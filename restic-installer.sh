@@ -166,7 +166,7 @@ fi
 if [ ! -n "$(command -v restic)" ]
 then
 	while true; do
-		read -p $'\033[33mIt seamns restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
+		read -p $'\033[33mIt seems restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
 	    case $answer in
 	        [Yy]* ) install; break;;
 	        [Nn]* ) exit;;
