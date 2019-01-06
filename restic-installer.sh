@@ -5,7 +5,7 @@
 # @version			0.1.0
 # @date				2014-07-30
 # @license			DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-# 
+
 
 # Set environment
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -26,36 +26,22 @@ echo -e "===========================================\n"
 # 	exit 1;
 # fi
 
+function update (){
 
-if [ -n "$(command -v restic)" ]
-then
-	echo -e "\033[33mlooks like restic is already installed: \033[0m\n"
-	echo -e "Install path: "$(command -v restic)
-	echo -e "You can now call it in your terminal like this;"
-	echo -e "$ restic\n"
+	echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
+	echo -e "$ restic self-update\n"
 	
-	# Confirm restic installation
-	read -p $'\033[33mrestic is already installed, do you want to update it? [Y/n]\033[0m: ' chooseUpdate 
+	echo -e "===========================================\n"
 
-	# Attempt update
-	if [ -z $chooseUpdate ] || [ $chooseUpdate == "Y" ] || [ $chooseUpdate == "y" ]|| [ $chooseUpdate == "yes" ]
-	then	
+	installedPath=$(command -v restic)
+	$installedPath self-update
 
-		echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
-		echo -e "$ restic self-update\n"
-		
-		echo -e "===========================================\n"
-
-		installedPath=$(command -v restic)
-		$installedPath self-update
-	fi
-fi
+}
 
 
 function os_flavour ()
 {
 	echo $(uname | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
-
 }
 
 function os_type ()
@@ -94,25 +80,19 @@ function get_restic_release(){
 }
 
 
-# Download part
+function install_crontab () {
+		echo -e "\n# Dynamically added by restic installer\nIt can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
+		echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
+}
 
-if [ ! -n "$(command -v restic)" ]
-then
-
-	# Confirm restic installation
-	read -p $'\033[33mrestic is required and could not be found. Do you want to install it? [Y/n]\033[0m: ' installAccept 
-
-	# Attempt to install restic
-	if [ -z $installAccept ] || [ $installAccept == "Y" ] || [ $installAccept == "y" ]|| [ $installAccept == "yes" ]
-	then
-		
+# Instqll function
+function install() {
 		flavor=$(os_flavour)
 		cpu_type=$(os_type)
 		restic_version=$(get_restic_release)
 
-
+		# fix for mac
 		installPath="/usr/bin";
-		
 		if [ ! -w "$installPath" ]; 
 		then 
 			installPath="/usr/local/bin";	
@@ -122,7 +102,6 @@ then
  
  		githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
  		responseCode=$( echo $githubHeaders | awk 'NR==1{print $2}')
-
 
 		if [ "$responseCode" != "200" ];
 		then
@@ -137,7 +116,6 @@ then
 		fi
 
  		echo -e "\033[36mDownloading to restic.bz2... \033[0m"
-
 		wget -O restic.bz2 $url
 		
 		echo -e "\033[36mExtracting restic.bz2... \033[0m"
@@ -155,17 +133,46 @@ then
 
 		if [ -n "$(command -v crontab)" ]
 		then
-			read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' cronUpdate 
-
-			# Attempt to install restic
-			if [ $cronUpdate == "Y" ] || [ $cronUpdate == "y" ] || [ $cronUpdate == "yes" ]
-			then
-				echo -e "\n# Dynamically added by restic installer\nIt can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
-				echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
-			fi
+			while true; do
+				read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' answer 
+			    case $answer in
+			        [Yy]* ) install_crontab; break;;
+			        [Nn]* ) exit;;
+			        	* ) echo "Please answer yes or no.";;
+			    esac
+			done
 		fi
-	fi
+}
 
+# 1st part
+if [ -n "$(command -v restic)" ]
+then
+	echo -e "\033[33mlooks like restic is already installed: \033[0m\n"
+	echo -e "Install path: "$(command -v restic)
+	echo -e "You can now call it in your terminal like this;"
+	echo -e "$ restic\n"
+	
+	while true; do
+	   	read -p $'\033[33mrestic is already installed, do you want to update it? [Y/n]\033[0m: ' answer 
+	    case $answer in
+	        [Yy]* ) update; break;;
+	        [Nn]* ) exit;;
+	        	* ) echo "Please answer yes or no.";;
+	    esac
+	done
+fi
+
+# install part
+if [ ! -n "$(command -v restic)" ]
+then
+	while true; do
+		read -p $'\033[33mIt seamns restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
+	    case $answer in
+	        [Yy]* ) install; break;;
+	        [Nn]* ) exit;;
+	        	* ) echo "Please answer yes or no.";;
+	    esac
+	done
 	
 	if [ ! -n "$(command -v restic)" ]
 	then
