@@ -15,13 +15,13 @@ rastic can be installed in 4 (that's right, four) ways: via `git clone`, `curl`,
 #### via curl
 
 ```shell
-curl https://raw.githubusercontent.com/necenzurat/restic-installer/master/restic-installer.sh | bash
+bash -c "$(curl https://raw.githubusercontent.com/necenzurat/restic-installer/master/restic-installer.sh)"
 ```
 
 #### via wget
 
 ```shell
-wget -O - https://raw.githubusercontent.com/necenzurat/restic-installer/master/restic-installer.sh | bash
+bash -c "$(wget -O - https://raw.githubusercontent.com/necenzurat/restic-installer/master/restic-installer.sh)"
 ```
 
 #### via git clone 
