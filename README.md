@@ -42,6 +42,10 @@ bash restic-installer.sh
 [install-rastic.sh](restic-installer.sh), ```copy, ssh to server, paste to server, save file, then run file.```
 
 
+### :page_facing_up: Issues
+
+[Click here to add issue](/issues)
+
 ### 📜License
 
 [License](license.md)
