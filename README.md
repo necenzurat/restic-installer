@@ -1,10 +1,12 @@
-# restic-installer
+## Restic Installer
+
+A super bashable installer for [restic](https://github.com/restic/restic)
 
 ## Getting Started
 
-### Prerequisites
 
-__Disclaimer:__ _I_
+### Prerequisites
+Workks on alot of platforms.
 
 ### Basic Installation
 
