@@ -1,11 +1,10 @@
 # :card_file_box: Restic Installer
 
-📝 [restic](https://github.com/restic/restic) is an awesome backup :floppy_disk: utility, this is an script that installs it quickly on different platforms. 
-
+📝 [restic](https://github.com/restic/restic) is an awesome :package: backup utility, this is an script that installs it quickly on different platforms. 
 
 ### What platforms
 
-Workks on alot of platforms.
+Tested on: MacOS, Raspbian 32 bits (not tested on 64 bits but should work), CentOS, Ubuntu, Debian, [Turris Omnia](https://omnia.turris.cz/en/) (OpenWRT).
 
 ### Breakdown
 
