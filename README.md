@@ -44,4 +44,4 @@ bash restic-installer.sh
 
 ### 📜License
 
-[License.me](License)
+[license.me](License)
