@@ -35,9 +35,7 @@ function update (){
 
 	installedPath=$(command -v restic)
 	$installedPath self-update
-
 }
-
 
 function os_flavour ()
 {
@@ -79,19 +77,18 @@ function get_restic_release(){
 	echo $(wget -q -O- https://api.github.com/repos/restic/restic/releases/latest | grep tag_name | cut -d '"' -f 4  | cut -d 'v' -f 2)
 }
 
-
 function install_crontab () {
-		echo -e "\n# Dynamically added by restic installer\n#It can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
-		echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
+	echo -e "\n# Dynamically added by restic installer\n# It can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
+	echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
 }
 
-# Instqll function
+# Install function
 function install() {
 		flavor=$(os_flavour)
 		cpu_type=$(os_type)
 		restic_version=$(get_restic_release)
 
-		# fix for mac
+		# fix for low privilege... plebs
 		installPath="/usr/bin";
 		if [ ! -w "$installPath" ]; 
 		then 
@@ -138,7 +135,7 @@ function install() {
 			    case $answer in
 			        [Yy]* ) install_crontab; break;;
 			        [Nn]* ) exit;;
-			        	* ) echo "Please answer yes or no.";;
+			        * ) echo "Please answer yes or no.";;
 			    esac
 			done
 		fi
@@ -157,7 +154,7 @@ then
 	    case $answer in
 	        [Yy]* ) update; break;;
 	        [Nn]* ) exit;;
-	        	* ) echo "Please answer yes or no.";;
+	        * ) echo "Please answer yes or no.";;
 	    esac
 	done
 fi
@@ -170,7 +167,7 @@ then
 	    case $answer in
 	        [Yy]* ) install; break;;
 	        [Nn]* ) exit;;
-	        	* ) echo "Please answer yes or no.";;
+	        * ) echo "Please answer yes or no.";;
 	    esac
 	done
 	
