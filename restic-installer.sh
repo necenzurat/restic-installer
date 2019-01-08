@@ -1,11 +1,13 @@
 #!/bin/bash
 #
-# restic install script
+# A restic agnostic(ish) install script
 #
 # @version  0.1.0
-# @date	2014-07-30
+# @date		2019-01-09
 # @license  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-set -x
+# 
+# uncomment this for debugging
+# set -x
 # Set environment
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -73,6 +75,8 @@ if [[ $(osType) == "unsupported" ]]; then
 	echo -e "\033[91m"$(uname -m)" is unsupported by this installer, try installing it from source. \033[0m"
 	echo -e "\033[91mPlease try downloading and installing it manually or compile it by source: \033[0m"
 	echo -e "https://github.com/restic/restic/releases\n\n"
+	echo -e "or just make an issue here: https://github.com/necenzurat/restic-installer/issues\n\n"
+	
 	exit 1;
 fi
 
@@ -96,7 +100,6 @@ function install() {
 	then 
 		installPath="/usr/local/bin";   
 	fi
-
 	resticGithub=$(wget --server-response -O- "https://api.github.com/repos/restic/restic/releases/latest" --show-progress 2>&1)
 	if [[ $? -ne 0 ]]; then
 		echo -e "\033[91mThere was a problem connecting to https://api.github.com/repos/restic/restic/releases/latest for the latest version from Github!\033[0m"
@@ -165,7 +168,6 @@ then
 	echo -e "Install path: "$(command -v restic)
 	echo -e "You can now call it in your terminal like this;"
 	echo -e "$ restic\n"
-	
 	while true; do
 		read -p $'\033[33mrestic is already installed, do you want to update it? [Y/n]\033[0m: ' answer 
 		case $answer in
@@ -187,7 +189,6 @@ then
 			* ) echo "Please answer yes or no.";;
 		esac
 	done
-	
 	if [ ! -n "$(command -v restic)" ]
 	then
 		# Show error
