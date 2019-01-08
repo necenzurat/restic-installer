@@ -89,7 +89,7 @@ function install_crontab () {
 		crontab -u $USER -l 2> /dev/null | { cat; echo "0 0 * * * ${installPath}/restic self-update > /var/log/restic-update.log 2>&1"; } | crontab -u $USER -
 		echo -e "A cron job has been set in crontab, check it running crontab -l, and the output will be sent to /var/log/restic-update.log"
 	else 
-		(cat /etc/crontab | grep -v "restic self-update") >> /etc/crontab
+		(cat /etc/crontab | grep -v "restic self-update")  > /etc/crontab.tmp && mv /etc/crontab.tmp /etc/crontab
 		echo -e "\n# Restic Auto Update, you can remove this if you don't like updates\n0 0 * * *  root  ${installPath}/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
 		echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
 	fi
