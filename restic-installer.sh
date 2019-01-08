@@ -30,7 +30,6 @@ function update (){
 
 	echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
 	echo -e "$ restic self-update\n"
-	
 	echo -e "===========================================\n"
 
 	installedPath=$(command -v restic)
@@ -78,7 +77,7 @@ function get_restic_release(){
 }
 
 function install_crontab () {
-	echo -e "\n# Dynamically added by restic installer\n# It can be removed if auto update is no longer necessary\n0 0 * * *  root  $installPath/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
+	echo -e "\n# Dynamically added by restic installer\n# It can be removed if auto update is no longer necessary\n0 0 * * *  root  ${installPath}/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
 	echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
 }
 
@@ -90,7 +89,7 @@ function install() {
 
 		# fix for low privilege... plebs
 		installPath="/usr/bin";
-		if [ ! -w "$installPath" ]; 
+		if [ ! -w "${installPath}" ]; 
 		then 
 			installPath="/usr/local/bin";	
 		fi
@@ -118,11 +117,11 @@ function install() {
 		echo -e "\033[36mExtracting restic.bz2... \033[0m"
 		bzip2 -d restic.bz2
 		
-		echo -e "\033[36mMoving it to $installPath/restic \033[0m"
-		mv restic $installPath/restic
+		echo -e "\033[36mMoving it to ${installPath}/restic \033[0m"
+		mv restic ${installPath}/restic
 		
-		echo -e "\033[36mMaking $installPath/restic executable \033[0m"
-		chmod +x $installPath/restic
+		echo -e "\033[36mMaking ${installPath}/restic executable \033[0m"
+		chmod +x ${installPath}/restic
 
 		echo -e "\033[32mrestic has been installed, you can now call it in your terminal like this: \033[0m\n"
 		echo -e "$ restic\n"
