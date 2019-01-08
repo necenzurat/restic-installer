@@ -51,22 +51,22 @@ function os_type ()
 {
 	osType=$(uname -m)
 	case $osType in
-	  x86_64|amd64)
-	    osType='amd64'
-	    ;;
-	  i?86|x86)
-	    osType='386'
-	    ;;
-	  arm*)
-	    osType='arm'
-	    ;;
-	  aarch64)
-	    osType='arm64'
-	    ;;
-	  *)
-	    osType="unsupported"
-	    exit 1;
-	    ;;
+		x86_64|amd64)
+		osType='amd64'
+		;;
+		i?86|x86)
+		osType='386'
+		;;
+		arm*)
+		osType='arm'
+		;;
+		aarch64)
+		osType='arm64'
+		;;
+		*)
+		osType="unsupported"
+		exit 1;
+		;;
 	esac
 	echo $osType;
 }
@@ -82,8 +82,7 @@ function get_restic_release(){
 	echo $(wget -q -O- https://api.github.com/repos/restic/restic/releases/latest | grep tag_name | cut -d '"' -f 4  | cut -d 'v' -f 2)
 }
 
-function install_crontab () {
-	
+function install_crontab () {	
 	if [ ! -e /etc/crontab ] || [ ! -w /etc/crontab ]; 
 	then 
 		(crontab  -l | grep -v "restic self-update") | crontab -u $USER -
@@ -98,71 +97,71 @@ function install_crontab () {
 
 # Install function
 function install() {
-		flavor=$(os_flavour)
-		cpu_type=$(os_type)
-		restic_version=$(get_restic_release)
+	flavor=$(os_flavour)
+	cpu_type=$(os_type)
+	restic_version=$(get_restic_release)
 
-		# fix for low privilege... plebs
-		installPath="/usr/bin";
-		if [ ! -w "${installPath}" ]; 
-		then 
-			installPath="/usr/local/bin";	
-		fi
+	# fix for low privilege... plebs
+	installPath="/usr/bin";
+	if [ ! -w "${installPath}" ]; 
+	then 
+		installPath="/usr/local/bin";	
+	fi
 
-		url="https://github.com/restic/restic/releases/download/v"${restic_version}"/restic_"${restic_version}"_"${flavor}"_"${cpu_type}".bz2"
- 
-        # this, right here is awesome and took a shitty long time to write
-        # fucking bash
-        # please refactor if you know bash
-        githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
-        responseCode=$(echo "$githubHeaders" | awk 'NR==1{print $2}')
-        ratelLimits=$(echo "$githubHeaders" | grep X-RateLimit- | head -n 3)
-        remaining=$(echo "${ratelLimits}" | grep "X-RateLimit-Remaining:" | cut -d":" -f2)
-        resets=$(echo "${ratelLimits}" | grep "X-RateLimit-Reset:" | cut -d":" -f2)
-        timeNow=$(date +%s)
-        resetSeconds=$(expr $resets - $timeNow );
-        resetMinutes=$(expr $resetSeconds / 60 + 1);
+	url="https://github.com/restic/restic/releases/download/v"${restic_version}"/restic_"${restic_version}"_"${flavor}"_"${cpu_type}".bz2"
 
-		if [ "$responseCode" != "200" ];
+	# this, right here is awesome and took a shitty long time to write
+	# fucking bash
+	# please refactor if you know bash
+	githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
+	responseCode=$(echo "$githubHeaders" | awk 'NR==1{print $2}')
+	ratelLimits=$(echo "$githubHeaders" | grep X-RateLimit- | head -n 3)
+	remaining=$(echo "${ratelLimits}" | grep "X-RateLimit-Remaining:" | cut -d":" -f2)
+	resets=$(echo "${ratelLimits}" | grep "X-RateLimit-Reset:" | cut -d":" -f2)
+	timeNow=$(date +%s)
+	resetSeconds=$(expr $resets - $timeNow );
+	resetMinutes=$(expr $resetSeconds / 60 + 1);
+
+	if [ "$responseCode" != "200" ];
+	then
+		echo -e "\033[91mThere was a problem downloading Restic from Github!\033[0m"
+		echo -e "We got a response code of $responseCode"
+		if [ "$remaining" -eq "0" ];
 		then
-			echo -e "\033[91mThere was a problem downloading Restic from Github!\033[0m"
-			echo -e "We got a response code of $responseCode"
-            if [ "$remaining" -eq "0" ];
-			then
-				echo -e "\033[33mYou have $remaining requests to Github this hour, resets in about $resetMinutes minutes \033[0m"
-                echo -e "Please try again after $resetMinutes minutes pass";
-			fi
-			echo -e "Or you can manualy try to download and install from here: https://github.com/restic/restic/releases"
-			exit 1;
+			echo -e "\033[33mYou have $remaining requests to Github this hour, resets in about $resetMinutes minutes \033[0m"
+			echo -e "Please try again after $resetMinutes minutes pass";
 		fi
+		echo -e "Or you can manualy try to download and install from here: https://github.com/restic/restic/releases"
+		exit 1;
+	fi
 
- 		echo -e "\033[36mDownloading to restic.bz2... \033[0m"
-		wget --quiet -O restic.bz2 $url
-		
-		echo -e "\033[36mExtracting restic.bz2... \033[0m"
-		bzip2 -d restic.bz2
-		
-		echo -e "\033[36mMoving it to ${installPath}/restic \033[0m"
-		mv restic ${installPath}/restic
-		
-		echo -e "\033[36mMaking ${installPath}/restic executable \033[0m"
-		chmod +x ${installPath}/restic
+	echo -e "\033[36mDownloading to restic.bz2... \033[0m"
+	wget --quiet -O restic.bz2 $url
+	
+	echo -e "\033[36mExtracting restic.bz2... \033[0m"
+	bzip2 -d restic.bz2
+	
+	echo -e "\033[36mMoving it to ${installPath}/restic \033[0m"
+	mv restic ${installPath}/restic
+	
+	echo -e "\033[36mMaking ${installPath}/restic executable \033[0m"
+	chmod +x ${installPath}/restic
 
-		echo -e "\033[32mrestic has been installed, you can now call it in your terminal like this: \033[0m\n"
-		echo -e "$ restic\n"
+	echo -e "\033[32mrestic has been installed, you can now call it in your terminal like this: \033[0m\n"
+	echo -e "$ restic\n"
 
 
-		if [ -n "$(command -v crontab)" ]
-		then
-			while true; do
-				read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' answer 
-			    case $answer in
-			        [Yy]* ) install_crontab; break;;
-			        [Nn]* ) exit;;
-			        * ) echo "Please answer yes or no.";;
-			    esac
-			done
-		fi
+	if [ -n "$(command -v crontab)" ]
+	then
+		while true; do
+			read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' answer 
+			case $answer in
+				[Yy]* ) install_crontab; break;;
+				[Nn]* ) exit;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
+	fi
 }
 
 # 1st part
