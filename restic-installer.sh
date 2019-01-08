@@ -2,9 +2,9 @@
 #
 # restic install script
 #
-# @version			0.1.0
-# @date				2014-07-30
-# @license			DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+# @version	0.1.0
+# @date		2014-07-30
+# @license	DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 
 
 # Set environment
@@ -33,7 +33,7 @@ function update (){
 	echo -e "===========================================\n"
 
 	installedPath=$(command -v restic)
-	$installedPath self-update
+	${installedPath} self-update
 }
 
 function os_flavour ()
@@ -94,25 +94,35 @@ function install() {
 			installPath="/usr/local/bin";	
 		fi
 
-		url="https://github.com/restic/restic/releases/download/v"$restic_version"/restic_"$restic_version"_"$flavor"_"$cpu_type".bz2"
+		url="https://github.com/restic/restic/releases/download/v"${restic_version}"/restic_"${restic_version}"_"${flavor}"_"${cpu_type}".bz2"
  
- 		githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
- 		responseCode=$( echo $githubHeaders | awk 'NR==1{print $2}')
+        # this, right here is awesome and took a shitty long time to write
+        # fucking bash
+        # please refactor if you know bash
+        githubHeaders=$(wget --server-response --spider --quiet "https://api.github.com/repos/restic/restic/releases/latest" 2>&1)
+        responseCode=$(echo "$githubHeaders" | awk 'NR==1{print $2}')
+        ratelLimits=$(echo "$githubHeaders" | grep X-RateLimit- | head -n 3)
+        remaining=$(echo "${ratelLimits}" | grep "X-RateLimit-Remaining:" | cut -d":" -f2)
+        resets=$(echo "${ratelLimits}" | grep "X-RateLimit-Reset:" | cut -d":" -f2)
+        timeNow=$(date +%s)
+        resetSeconds=$(expr $resets - $timeNow );
+        resetMinutes=$(expr $resetSeconds / 60 + 1);
 
 		if [ "$responseCode" != "200" ];
 		then
 			echo -e "\033[91mThere was a problem downloading Restic from Github!\033[0m"
 			echo -e "We got a response code of $responseCode"
-			if [ "$responseCode" != "200" ];
+            if [ "$remaining" -eq "0" ];
 			then
-				echo -e "It looks you are rate limited, maybe try again later!"
+				echo -e "\033[33mYou have $remaining requests to Github this hour, resets in about $resetMinutes minutes \033[0m"
+                echo -e "Please try again after $resetMinutes minutes pass";
 			fi
-			echo -e "Or you can manualy install it from here: https://github.com/restic/restic/releases"
+			echo -e "Or you can manualy try to download and install from here: https://github.com/restic/restic/releases"
 			exit 1;
 		fi
 
  		echo -e "\033[36mDownloading to restic.bz2... \033[0m"
-		wget -O restic.bz2 $url
+		wget --quiet -O restic.bz2 $url
 		
 		echo -e "\033[36mExtracting restic.bz2... \033[0m"
 		bzip2 -d restic.bz2
