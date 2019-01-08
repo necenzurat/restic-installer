@@ -24,7 +24,7 @@ if [ "$UID" != "0" ]; then
 	sudoPath=$(command -v sudo)
     if [ ! -w "${sudoPath}" ]; then
         echo -e "\033[32mThis installer requires needs to be run as with sudo\033[0m"
-        sudo $0 $*
+        sudo !!
         exit 1
    else
         echo -e "\033[91msudo was  not found, please run this installer as root!\033[0m"
