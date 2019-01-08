@@ -6,7 +6,6 @@
 # @date		2014-07-30
 # @license	DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 
-
 # Set environment
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -32,7 +31,6 @@ if [ "$UID" != "0" ]; then
         exit 1
    fi 
 fi
-
 
 function update (){
 
@@ -85,8 +83,17 @@ function get_restic_release(){
 }
 
 function install_crontab () {
-	echo -e "\n# Dynamically added by restic installer\n# It can be removed if auto update is no longer necessary\n0 0 * * *  root  ${installPath}/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
-	echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
+	
+	if [ ! -e /etc/crontab ] || [ ! -w /etc/crontab ]; 
+	then 
+		(crontab  -l | grep -v "restic self-update") | crontab -u $USER -
+		crontab -u $USER -l 2> /dev/null | { cat; echo "0 0 * * * ${installPath}/restic self-update > /var/log/restic-update.log 2>&1"; } | crontab -u $USER -
+		echo -e "A cron job has been set in crontab, check it running crontab -l, and the output will be sent to /var/log/restic-update.log"
+	else 
+		(cat /etc/crontab | grep -v "restic self-update") >> /etc/crontab
+		echo -e "\n# Restic Auto Update, you can remove this if you don't like updates\n0 0 * * *  root  ${installPath}/restic self-update > /var/log/restic-update.log 2>&1" >> /etc/crontab;
+		echo -e "A cron job has been set in /etc/crontab, and the output will be sent to /var/log/restic-update.log"
+	fi
 }
 
 # Install function
