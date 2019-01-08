@@ -19,18 +19,16 @@ echo -e "==========================================="
 echo -e "\nFast, secure, efficient backup program \n\nWeb: https://restic.net/\nGithub: https://github.com/restic/restic\nRTFM: https://restic.readthedocs.io/en/stable/"
 echo -e "===========================================\n"
 
-var="$(</dev/stdin)"
-echo "$var"
-
-
 if [ "$UID" != "0" ]; then
 	sudoPath=$(command -v sudo)
     if [ ! -w "${sudoPath}" ]; then
         echo -e "\033[32mThis installer requires needs to be run as with sudo\033[0m"
-        sudo $0 $*
+        wget --quiet https://github.com/necenzurat/restic-installer/raw/master/restic-installer.sh 
+		echo -e "You can run it like:"
+		echo -e "$ sudo bash restic-installer.sh\n"
         exit 1
    else
-        echo -e "\033[91msudo was  not found, please run this installer as root!\033[0m"
+        echo -e "\033[91msudo was not found, please run this installer as root!\033[0m"
         exit 1
    fi 
 fi
