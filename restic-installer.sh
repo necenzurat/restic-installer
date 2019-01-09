@@ -168,7 +168,7 @@ function install() {
 if [ -n "$(which restic)" ]; then
 	echo -e "\033[33mlooks like restic is already installed: \033[0m\n"
 	echo -e "Install path: "$(which restic)
-	echo -e "You can now call it in your terminal like this;"
+	echo -e "You can now call it in your terminal like this:\n"
 	echo -e "$ restic\n"
 	while true; do
 		read -p $'\033[33mrestic is already installed, do you want to update it? [Y/n]\033[0m: ' answer 
@@ -180,7 +180,6 @@ if [ -n "$(which restic)" ]; then
 	done
 fi
 
-# do you install it
 if [ ! -n "$(which restic)" ]; then
 	while true; do
 		read -p $'\033[33mIt seems restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
