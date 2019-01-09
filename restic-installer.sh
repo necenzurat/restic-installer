@@ -5,7 +5,7 @@
 # @version  0.1.0
 # @date	2014-07-30
 # @license  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-set -x
+# set -x
 # Set environment
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -19,7 +19,7 @@ echo -e "\nFast, secure, efficient backup program \n\nWeb: https://restic.net/\n
 echo -e "===========================================\n"
 
 if [ "$UID" != "0" ]; then
-	sudoPath=$(command -v sudo)
+	sudoPath=$(which sudo)
 	if [ ! -w "${sudoPath}" ]; then
 		echo -e "\033[91mThis installer requires root privileges!\033[0m"
 		if [ ! -w "restic-installer.sh" ]; then
@@ -38,7 +38,7 @@ function update (){
 	echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
 	echo -e "$ ${installedPath} self-update\n"
 	echo -e "===========================================\n"
-	installedPath=$(command -v restic)
+	installedPath=$(which restic)
 	${installedPath} self-update
 }
 
@@ -145,7 +145,7 @@ function install() {
 	echo -e "\033[32mrestic has been installed, you can now call it in your terminal like this: \033[0m\n"
 	echo -e "$ restic\n"
 
-	if [ -n "$(command -v crontab)" ]
+	if [ -n "$(which crontab)" ]
 	then
 		while true; do
 			read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' answer 
@@ -159,10 +159,10 @@ function install() {
 }
 
 # intro
-if [ -n "$(command -v restic)" ]
+if [ -n "$(which restic)" ]
 then
 	echo -e "\033[33mlooks like restic is already installed: \033[0m\n"
-	echo -e "Install path: "$(command -v restic)
+	echo -e "Install path: "$(which restic)
 	echo -e "You can now call it in your terminal like this;"
 	echo -e "$ restic\n"
 	
@@ -177,7 +177,7 @@ then
 fi
 
 # do you install it
-if [ ! -n "$(command -v restic)" ]
+if [ ! -n "$(which restic)" ]
 then
 	while true; do
 		read -p $'\033[33mIt seems restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
@@ -188,7 +188,7 @@ then
 		esac
 	done
 	
-	if [ ! -n "$(command -v restic)" ]
+	if [ ! -n "$(which restic)" ]
 	then
 		# Show error
 		echo -e "\033[91mError: restic is required and could not be installed \033[0m"
