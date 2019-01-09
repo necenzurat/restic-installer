@@ -20,30 +20,6 @@ echo -e "==========================================="
 echo -e "\nFast, secure, efficient backup program \n\nWeb: https://restic.net/\nGithub: https://github.com/restic/restic\nRTFM: https://restic.readthedocs.io/en/stable/"
 echo -e "===========================================\n"
 
-if [ "$UID" != "0" ]; then
-	sudoPath=$(which sudo)
-	if [ ! -w "${sudoPath}" ]; then
-		echo -e "\033[91mThis installer requires root privileges!\033[0m"
-		if [ ! -w "restic-installer.sh" ]; then
-			wget --quiet https://github.com/necenzurat/restic-installer/raw/master/restic-installer.sh 
-		fi
-		echo -e "You can try to run it again like this:"
-		echo -e "$ sudo bash restic-installer.sh\n"
-		exit 1
-	else
-		echo -e "\033[91msudo was not found, please run this installer as root!\033[0m"
-		exit 1
-	fi 
-fi
-
-function update (){
-	echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
-	echo -e "$ ${installedPath} self-update\n"
-	echo -e "===========================================\n"
-	installedPath=$(which restic)
-	${installedPath} self-update
-}
-
 function osFlavour () {
 	echo $(uname | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
 }
@@ -71,18 +47,49 @@ function osType () {
 	echo $osType;
 }
 
+wgetPath=$(which wget)
+if [ ! -e "${wgetPath}" ]; then
+	echo -e "\033[91mIt seems that you do not have wget installed.\033[0m"
+	echo -e "\033[91mYou are on your own.\033[0m\n"
+	echo -e "Or just make an issue here: https://github.com/necenzurat/restic-installer/issues\n\n"
+	echo -e "\033[32mHave an awesome day.\033[0m\n"
+	exit 1;
+fi
+
+if [ "$UID" != "0" ]; then
+	sudoPath=$(which sudo)
+	if [ ! -w "${sudoPath}" ]; then
+		echo -e "\033[91mThis installer requires root privileges!\033[0m"
+		if [ ! -w "restic-installer.sh" ]; then
+			${wgetPath} --quiet https://github.com/necenzurat/restic-installer/raw/master/restic-installer.sh 
+		fi
+		echo -e "You can try to run it again like this:\n"
+		echo -e "$ sudo bash restic-installer.sh\n"
+		exit 1
+	else
+		echo -e "\033[91msudo was not found, please run this installer as root!\033[0m"
+		exit 1
+	fi 
+fi
+
+function update (){
+	echo -e "\033[32mHint: restic can self update, you just need to execute this command: \033[0m\n"
+	echo -e "$ ${installedPath} self-update\n"
+	echo -e "===========================================\n"
+	installedPath=$(which restic)
+	${installedPath} self-update
+}
+
 if [[ $(osType) == "unsupported" ]]; then
 	echo -e "\033[91m"$(uname -m)" is unsupported by this installer, try installing it from source. \033[0m"
 	echo -e "\033[91mPlease try downloading and installing it manually or compile it by source: \033[0m"
 	echo -e "https://github.com/restic/restic/releases\n\n"
 	echo -e "or just make an issue here: https://github.com/necenzurat/restic-installer/issues\n\n"
-	
 	exit 1;
 fi
 
 function installCrontab () {	
-	if [ ! -e /etc/crontab ] || [ ! -w /etc/crontab ]; 
-	then 
+	if [ ! -e /etc/crontab ] || [ ! -w /etc/crontab ]; then 
 		(crontab  -l | grep -v "restic self-update") | crontab -u $USER -
 		crontab -u $USER -l 2> /dev/null | { cat; echo "0 0 * * * ${installPath}/restic self-update > /var/log/restic-update.log 2>&1"; } | crontab -u $USER -
 		echo -e "A cron job has been set in crontab, check it running crontab -l, and the output will be sent to /var/log/restic-update.log"
@@ -96,18 +103,17 @@ function installCrontab () {
 function install() {
 	# fix for low privilege... plebs
 	installPath="/usr/bin";
-	if [ ! -w "${installPath}" ]; 
-	then 
+	if [ ! -w "${installPath}" ]; then 
 		installPath="/usr/local/bin";   
 	fi
-	resticGithub=$(wget --server-response -O- "https://api.github.com/repos/restic/restic/releases/latest" --show-progress 2>&1)
+	resticGithub=$(${wgetPath} --server-response -O- "https://api.github.com/repos/restic/restic/releases/latest" --show-progress 2>&1)
 	if [[ $? -ne 0 ]]; then
 		echo -e "\033[91mThere was a problem connecting to https://api.github.com/repos/restic/restic/releases/latest for the latest version from Github!\033[0m"
 		echo -e "Please check your internetz and try again later!";
 		exit 1; 
 	fi
 
-	# this, right here is awesome and took a shitty long time to write
+	# this, right here is awesome and took a shit load of time to figure out how awk and cut works
 	# fucking bash
 	# please refactor this if you know bash
 	resticVersion=$(echo "$resticGithub" | grep "tag_name" | cut -d '"' -f 4  | cut -d 'v' -f 2)
@@ -119,12 +125,10 @@ function install() {
 	resetSeconds=$(expr $resets - $timeNow );
 	resetMinutes=$(expr $resetSeconds / 60 + 1);
 
-	if [ "$responseCode" != "200" ];
-	then
+	if [ "$responseCode" != "200" ]; then
 		echo -e "\033[91mThere was a problem downloading Restic from Github!\033[0m"
 		echo -e "We got a response code of $responseCode"
-		if [ "$remaining" -eq "0" ];
-		then
+		if [ "$remaining" -eq "0" ]; then
 			echo -e "\033[33mYou have $remaining requests to Github this hour, resets in about $resetMinutes minutes \033[0m"
 			echo -e "Please try again after $resetMinutes minutes pass";
 		fi
@@ -134,7 +138,7 @@ function install() {
 
 	downloadUrl="https://github.com/restic/restic/releases/download/v"${resticVersion}"/restic_"${resticVersion}"_"$(osFlavour)"_"$(osType)".bz2"
 	echo -e "\033[36mDownloading '$downloadUrl' to restic.bz2... \033[0m"
-	wget -O restic.bz2 $downloadUrl -q --show-progress
+	${wgetPath} -O restic.bz2 $downloadUrl -q --show-progress
 	
 	echo -e "\033[36mExtracting restic.bz2... \033[0m"
 	bzip2 -d restic.bz2
@@ -142,14 +146,13 @@ function install() {
 	echo -e "\033[36mMoving it to ${installPath}/restic \033[0m"
 	mv restic ${installPath}/restic
 	
-	echo -e "\033[36mMaking ${installPath}/restic executable \033[0m"
+	echo -e "\033[36mMaking ${installPath}/restic executable \033[0m\n"
 	chmod +x ${installPath}/restic
 
 	echo -e "\033[32mrestic has been installed, you can now call it in your terminal like this: \033[0m\n"
 	echo -e "$ restic\n"
 
-	if [ -n "$(which crontab)" ]
-	then
+	if [ -n "$(which crontab)" ]; then
 		while true; do
 			read -p $'\033[33mDo you like to install a cron entry for auto updating restic? [Y/n]\033[0m: ' answer 
 			case $answer in
@@ -161,9 +164,8 @@ function install() {
 	fi
 }
 
-# intro
-if [ -n "$(which restic)" ]
-then
+# installer begins here
+if [ -n "$(which restic)" ]; then
 	echo -e "\033[33mlooks like restic is already installed: \033[0m\n"
 	echo -e "Install path: "$(which restic)
 	echo -e "You can now call it in your terminal like this;"
@@ -179,8 +181,7 @@ then
 fi
 
 # do you install it
-if [ ! -n "$(which restic)" ]
-then
+if [ ! -n "$(which restic)" ]; then
 	while true; do
 		read -p $'\033[33mIt seems restic is not installed. Do you want to install it? [Y/n]\033[0m: ' answer 
 		case $answer in
@@ -189,9 +190,7 @@ then
 			* ) echo "Please answer yes or no.";;
 		esac
 	done
-	
-	if [ ! -n "$(command -v restic)" ]
-	then
+	if [ ! -n "$(which restic)" ]; then
 		# Show error
 		echo -e "\033[91mError: restic is required and could not be installed \033[0m"
 		echo -e "\033[91mPlease try downloading and installing it manually or compile it by source: \033[0m\n"
