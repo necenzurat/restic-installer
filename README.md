@@ -36,12 +36,14 @@ cd restic-installer
 bash restic-installer.sh
 ```
 
+
 #### copy paste
 
 [install-rastic.sh](restic-installer.sh), ```copy, ssh to server, paste to server, save file, then run file.```
 
 
-### :page_facing_up: Issues
+### ⚠️ Known Issues
+wget is required
 
 [Click here to add issue](https://github.com/necenzurat/restic-installer/issues)
 
